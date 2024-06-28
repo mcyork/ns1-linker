@@ -51,13 +51,13 @@ Replace `"YOUR_API_KEY"` with your actual NS1 API key.
 You can provide the primary zone name and the path to the file containing the list of zones as command line arguments:
 
 ```bash
-python ns1_linker.py mcyork.com zones.txt
+python ns1-linker.py mcyork.com zones.txt
 ```
 
 If you don't provide the arguments, the script will prompt you to enter them:
 
 ```bash
-python ns1_linker.py
+python ns1-linker.py
 ```
 
 ### Example Zones File
@@ -74,7 +74,7 @@ invoices.org
 To run the script, use the following command:
 
 ```bash
-python ns1_linker.py mcyork.com zones.txt
+python ns1-linker.py mcyork.com zones.txt
 ```
 
 Replace `mcyork.com` with your actual primary zone and `zones.txt` with the path to your zones file.
