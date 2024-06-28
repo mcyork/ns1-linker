@@ -110,7 +110,11 @@ def process_zones(file_path, primary_zone_name):
             print(format_records(records.get("records", [])))
             log_action(f"Records for zone {zone}:\n{format_records(records.get('records', []))}")
 
-            confirm = input(f"Do you want to delete zone {zone} and create it as a linked zone? (Y/n): ").strip().lower()
+            question = f"Do you want to delete zone {zone} and create it as a linked zone? (Y/n): "
+            confirm = input(question).strip().lower()
+            log_action(f"User prompt: {question}")
+            log_action(f"User response: {confirm}")
+
             if confirm == 'y':
                 delete_zone(zone)
                 create_linked_zone(zone, primary_zone_name)
@@ -120,7 +124,12 @@ def process_zones(file_path, primary_zone_name):
         else:
             print(f"No records found or error fetching records for zone {zone}.")
             log_action(f"No records found or error fetching records for zone {zone}.")
-            confirm = input(f"Do you want to link zone {zone} to {primary_zone_name}? (Y/n): ").strip().lower()
+            
+            question = f"Do you want to link zone {zone} to {primary_zone_name}? (Y/n): "
+            confirm = input(question).strip().lower()
+            log_action(f"User prompt: {question}")
+            log_action(f"User response: {confirm}")
+
             if confirm == 'y':
                 create_linked_zone(zone, primary_zone_name)
             else:
