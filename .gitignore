@@ -2,3 +2,5 @@ config_local.py
 bin
 include
 lib
+__pycache__/config_local.cpython-310.pyc
+ns1_actions.log
