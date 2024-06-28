@@ -44,13 +44,15 @@ def delete_zone(zone_name):
         log_action(f"Failed to delete zone {zone_name}: {response.text}")
 
 def create_linked_zone(new_zone, primary_zone):
-    url = "https://api.nsone.net/v1/zones"
+    url = f"https://api.nsone.net/v1/zones/{new_zone}"
     payload = {
         "zone": new_zone,
         "link": primary_zone
     }
-    print(f"Creating linked zone with payload: {json.dumps(payload)}")  # Debugging line
-    response = requests.post(url, headers=HEADERS, json=payload)
+    print(f"Creating linked zone with payload: {json.dumps(payload)} at URL: {url}")  # Debugging line
+    response = requests.put(url, headers=HEADERS, json=payload)
+    print(f"Response status code: {response.status_code}")
+    print(f"Response text: {response.text}")
     if response.status_code == 200:
         print(f"Linked zone {new_zone} created successfully.")
         log_action(f"Linked zone {new_zone} created successfully.")
