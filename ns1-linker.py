@@ -68,6 +68,11 @@ def get_all_zones():
         return []
 
 def process_zones(file_path, primary_zone_name):
+    if not os.path.exists(file_path):
+        print(f"Error: The file '{file_path}' does not exist.")
+        log_action(f"Error: The file '{file_path}' does not exist.")
+        return
+
     with open(file_path, "r") as file:
         zones = file.readlines()
 
