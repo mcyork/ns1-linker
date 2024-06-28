@@ -102,7 +102,7 @@ def process_zones(file_path, primary_zone_name):
             
             print(f"Records for zone {zone}:")
             print(format_records(records.get("records", [])))
-            log_action(f"Records for zone {zone}:\n{format_records(records.get("records", []))}")
+            log_action(f"Records for zone {zone}:\n{format_records(records.get('records', []))}")
 
             confirm = input(f"Do you want to delete zone {zone} and create it as a linked zone? (Y/n): ").strip().lower()
             if confirm == 'y':
