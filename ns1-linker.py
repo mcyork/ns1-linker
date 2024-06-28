@@ -3,6 +3,7 @@ import requests
 import json
 import time
 import sys
+from datetime import datetime
 
 # Try to import from config_local first, fall back to config if not found
 try:
@@ -16,8 +17,9 @@ HEADERS = {
 }
 
 def log_action(action):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(config.LOG_FILE, "a") as log_file:
-        log_file.write(action + "\n")
+        log_file.write(f"[{timestamp}] {action}\n")
 
 def get_zone_records(zone_name):
     url = f"https://api.nsone.net/v1/zones/{zone_name}"
@@ -101,10 +103,26 @@ def process_zones(file_path, primary_zone_name):
 
         records = get_zone_records(zone)
         if records:
-            if "link" in records and records["link"] == primary_zone_name:
-                print(f"Zone {zone} is already linked to {primary_zone_name}. No action required.")
-                log_action(f"Zone {zone} is already linked to {primary_zone_name}. No action required.")
-                continue
+            if "link" in records:
+                if records["link"] == primary_zone_name:
+                    print(f"Zone {zone} is already linked to {primary_zone_name}. No action required.")
+                    log_action(f"Zone {zone} is already linked to {primary_zone_name}. No action required.")
+                    continue
+                else:
+                    print(f"Zone {zone} is linked to {records['link']}. Do you want to re-link it to {primary_zone_name}? (Y/n):")
+                    log_action(f"Zone {zone} is linked to {records['link']}. Prompting user to re-link to {primary_zone_name}.")
+                    question = f"Do you want to re-link zone {zone} to {primary_zone_name}? (Y/n): "
+                    confirm = input(question).strip().lower()
+                    log_action(f"User prompt: {question}")
+                    log_action(f"User response: {confirm}")
+
+                    if confirm == 'y':
+                        delete_zone(zone)
+                        create_linked_zone(zone, primary_zone_name)
+                    else:
+                        print(f"Skipped re-linking of zone {zone}.")
+                        log_action(f"Skipped re-linking of zone {zone}.")
+                        continue
             
             print(f"Records for zone {zone}:")
             print(format_records(records.get("records", [])))
