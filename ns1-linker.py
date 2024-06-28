@@ -49,10 +49,7 @@ def create_linked_zone(new_zone, primary_zone):
         "zone": new_zone,
         "link": primary_zone
     }
-    print(f"Creating linked zone with payload: {json.dumps(payload)} at URL: {url}")  # Debugging line
     response = requests.put(url, headers=HEADERS, json=payload)
-    print(f"Response status code: {response.status_code}")
-    print(f"Response text: {response.text}")
     if response.status_code == 200:
         print(f"Linked zone {new_zone} created successfully.")
         log_action(f"Linked zone {new_zone} created successfully.")
@@ -69,6 +66,12 @@ def get_all_zones():
         print(f"Failed to fetch zones: {response.text}")
         log_action(f"Failed to fetch zones: {response.text}")
         return []
+
+def format_records(records):
+    formatted = []
+    for record in records:
+        formatted.append(f"{record['type']} {record['domain']} {record['ttl']} {', '.join(record['short_answers'])}")
+    return "\n".join(formatted)
 
 def process_zones(file_path, primary_zone_name):
     if not os.path.exists(file_path):
@@ -90,22 +93,16 @@ def process_zones(file_path, primary_zone_name):
         print(f"Processing zone: {zone}")
         log_action(f"Processing zone: {zone}")
 
-        if zone not in all_zone_names:
-            print(f"Zone {zone} does not exist in NS1.")
-            log_action(f"Zone {zone} does not exist in NS1.")
-            confirm = input(f"Do you want to link zone {zone} to {primary_zone_name}? (Y/n): ").strip().lower()
-            if confirm == 'y':
-                create_linked_zone(zone, primary_zone_name)
-            else:
-                print(f"Skipped linking of zone {zone}.")
-                log_action(f"Skipped linking of zone {zone}.")
-            continue
-
         records = get_zone_records(zone)
         if records:
+            if "link" in records and records["link"] == primary_zone_name:
+                print(f"Zone {zone} is already linked to {primary_zone_name}. No action required.")
+                log_action(f"Zone {zone} is already linked to {primary_zone_name}. No action required.")
+                continue
+            
             print(f"Records for zone {zone}:")
-            print(json.dumps(records, indent=2))
-            log_action(f"Records for zone {zone}:\n{json.dumps(records, indent=2)}")
+            print(format_records(records.get("records", [])))
+            log_action(f"Records for zone {zone}:\n{format_records(records.get("records", []))}")
 
             confirm = input(f"Do you want to delete zone {zone} and create it as a linked zone? (Y/n): ").strip().lower()
             if confirm == 'y':
@@ -117,19 +114,24 @@ def process_zones(file_path, primary_zone_name):
         else:
             print(f"No records found or error fetching records for zone {zone}.")
             log_action(f"No records found or error fetching records for zone {zone}.")
-
+            confirm = input(f"Do you want to link zone {zone} to {primary_zone_name}? (Y/n): ").strip().lower()
+            if confirm == 'y':
+                create_linked_zone(zone, primary_zone_name)
+            else:
+                print(f"Skipped linking of zone {zone}.")
+                log_action(f"Skipped linking of zone {zone}.")
+        
         time.sleep(1)  # To avoid rate limiting
 
 # Main execution
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        primary_zone_name = sys.argv[1]
-    else:
-        primary_zone_name = input("Enter the primary zone name: ").strip()
+if len(sys.argv) > 1:
+    primary_zone_name = sys.argv[1]
+else:
+    primary_zone_name = input("Enter the primary zone name: ").strip()
 
-    if len(sys.argv) > 2:
-        file_path = sys.argv[2]
-    else:
-        file_path = input("Enter the path to the file containing the list of zones: ").strip()
+if len(sys.argv) > 2:
+    file_path = sys.argv[2]
+else:
+    file_path = input("Enter the path to the file containing the list of zones: ").strip()
 
-    process_zones(file_path, primary_zone_name)
+process_zones(file_path, primary_zone_name)
